@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#123c45" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Chatbot Escolar" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Chatbot Escolar</title>
+    <link rel="manifest" href="app.webmanifest" />
+    <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/app-icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="sidebar" aria-label="Informacoes escolares">
+        <div class="school-mark">
+          <span class="school-mark__icon">CE</span>
+          <div>
+            <p class="eyebrow">Assistente escolar</p>
+            <h1>Chatbot Escolar</h1>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h2>Hoje</h2>
+          <div class="today-card">
+            <span class="today-card__label">Merenda</span>
+            <strong id="todayMeal">Carregando...</strong>
+          </div>
+          <div class="today-card">
+            <span class="today-card__label">Proximo evento</span>
+            <strong id="nextEvent">Carregando...</strong>
+          </div>
+        </div>
+
+        <div class="quick-list">
+          <h2>Perguntas rapidas</h2>
+          <button type="button" data-question="Qual e a merenda de hoje?">Merenda de hoje</button>
+          <button type="button" data-question="Quais sao os eventos da escola?">Eventos</button>
+          <button type="button" data-question="Horario do 8 ano B">Horario do 8 ano B</button>
+          <button type="button" data-question="Contato da secretaria">Secretaria</button>
+        </div>
+      </section>
+
+      <section class="chat-panel" aria-label="Chat com assistente escolar">
+        <header class="chat-header">
+          <div>
+            <p class="eyebrow">Online</p>
+            <h2>Como posso ajudar?</h2>
+          </div>
+          <span class="status-pill">Dados demonstrativos</span>
+        </header>
+
+        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+
+        <form id="chatForm" class="chat-form">
+          <label class="sr-only" for="messageInput">Digite sua pergunta</label>
+          <input
+            id="messageInput"
+            type="text"
+            autocomplete="off"
+            placeholder="Pergunte sobre aulas, merenda, eventos..."
+          />
+          <button type="submit">Enviar</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("service-worker.js");
+        });
+      }
+    </script>
+  </body>
+</html>

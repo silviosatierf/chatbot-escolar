@@ -1,0 +1,26 @@
+services:
+  chatbot-escolar:
+    build: .
+    container_name: chatbot-escolar
+    restart: unless-stopped
+    ports:
+      - "4173:4173"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4173
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-}
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-escolar
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
