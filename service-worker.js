@@ -1,9 +1,10 @@
-const CACHE_NAME = "chatbot-escolar-v1";
+const CACHE_NAME = "chatbot-escolar-v2";
 const APP_ASSETS = [
   "/",
   "/index.html",
   "/styles.css",
   "/app.js",
+  "/dados-escola.js",
   "/config.js",
   "/app.webmanifest",
   "/icons/app-icon.svg",

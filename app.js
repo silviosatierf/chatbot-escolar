@@ -1,58 +1,13 @@
-const schoolData = {
-  contacts: {
-    secretaria: "A secretaria atende de segunda a sexta, das 7h30 as 17h. Telefone: (00) 0000-0000.",
-    coordenacao: "A coordenacao atende alunos no intervalo da manha e da tarde, mediante disponibilidade.",
-  },
-  meals: {
-    segunda: "Arroz, feijao, carne moida, salada e fruta.",
-    terca: "Macarrao ao molho, frango desfiado, legumes e suco.",
-    quarta: "Arroz, feijao, frango assado, salada e banana.",
-    quinta: "Sopa de legumes com carne e pao.",
-    sexta: "Arroz, feijao, omelete, salada e fruta.",
-  },
-  schedules: {
-    "6 ano A": [
-      ["07:30", "Matematica"],
-      ["08:20", "Portugues"],
-      ["09:10", "Ciencias"],
-      ["10:20", "Historia"],
-      ["11:10", "Educacao Fisica"],
-    ],
-    "7 ano A": [
-      ["07:30", "Portugues"],
-      ["08:20", "Geografia"],
-      ["09:10", "Matematica"],
-      ["10:20", "Artes"],
-      ["11:10", "Ciencias"],
-    ],
-    "8 ano B": [
-      ["07:30", "Historia"],
-      ["08:20", "Matematica"],
-      ["09:10", "Ingles"],
-      ["10:20", "Portugues"],
-      ["11:10", "Geografia"],
-    ],
-    "9 ano A": [
-      ["07:30", "Ciencias"],
-      ["08:20", "Matematica"],
-      ["09:10", "Portugues"],
-      ["10:20", "Historia"],
-      ["11:10", "Projeto de Vida"],
-    ],
-  },
-  events: [
-    { date: "2026-05-20", title: "Feira de Ciencias", detail: "Apresentacoes no patio principal a partir das 9h." },
-    { date: "2026-05-27", title: "Reuniao de Pais", detail: "Encontro com responsaveis as 18h30." },
-    { date: "2026-06-05", title: "Simulado Bimestral", detail: "Aplicacao para turmas do 8 e 9 ano." },
-  ],
-};
-
 const weekdayMap = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
+const schoolData = window.SCHOOL_DATA || {};
 const messagesEl = document.querySelector("#chatMessages");
 const formEl = document.querySelector("#chatForm");
 const inputEl = document.querySelector("#messageInput");
 const todayMealEl = document.querySelector("#todayMeal");
 const nextEventEl = document.querySelector("#nextEvent");
+const schoolNameEl = document.querySelector("#schoolName");
+const schoolSubtitleEl = document.querySelector("#schoolSubtitle");
+const schoolInitialsEl = document.querySelector("#schoolInitials");
 const chatbotConfig = window.CHATBOT_CONFIG || {};
 
 function normalizeText(text) {
@@ -76,32 +31,44 @@ function formatDate(dateText) {
 
 function getTodayMeal() {
   const weekday = weekdayMap[new Date().getDay()];
-  return schoolData.meals[weekday] || "Nao ha cardapio cadastrado para hoje.";
+  return schoolData.merenda?.[weekday] || "Nao ha cardapio cadastrado para hoje.";
 }
 
 function getUpcomingEvents() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return schoolData.events
+  return (schoolData.eventos || [])
     .filter((event) => new Date(`${event.date}T12:00:00`) >= today)
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function findScheduleKey(question) {
   const normalized = normalizeText(question);
-  return Object.keys(schoolData.schedules).find((key) => normalized.includes(normalizeText(key)));
+  return Object.keys(schoolData.horarios || {}).find((key) => normalized.includes(normalizeText(key)));
 }
 
 function formatSchedule(className) {
-  const lessons = schoolData.schedules[className];
+  const lessons = schoolData.horarios[className];
   const lessonList = lessons.map(([time, subject]) => `${time} - ${subject}`).join("\n");
   return `Horario da turma ${className}:\n${lessonList}`;
+}
+
+function findCustomAnswer(question) {
+  const normalized = normalizeText(question);
+  return (schoolData.respostas || []).find((item) => {
+    return (item.palavras || []).some((keyword) => normalized.includes(normalizeText(keyword)));
+  });
 }
 
 function answerQuestion(question) {
   const normalized = normalizeText(question);
   const scheduleKey = findScheduleKey(question);
+  const customAnswer = findCustomAnswer(question);
+
+  if (customAnswer) {
+    return customAnswer.resposta;
+  }
 
   if (normalized.includes("merenda") || normalized.includes("cardapio") || normalized.includes("lanche")) {
     return `A merenda de hoje e: ${getTodayMeal()}`;
@@ -122,20 +89,25 @@ function answerQuestion(question) {
       return formatSchedule(scheduleKey);
     }
 
-    const classes = Object.keys(schoolData.schedules).join(", ");
+    const classes = Object.keys(schoolData.horarios || {}).join(", ");
     return `Para consultar o horario, informe a turma. Turmas cadastradas: ${classes}.`;
   }
 
   if (normalized.includes("secretaria") || normalized.includes("contato") || normalized.includes("telefone")) {
-    return schoolData.contacts.secretaria;
+    return schoolData.contatos?.secretaria || "Contato da secretaria ainda nao cadastrado.";
   }
 
   if (normalized.includes("coordenacao") || normalized.includes("coordenador")) {
-    return schoolData.contacts.coordenacao;
+    return schoolData.contatos?.coordenacao || "Contato da coordenacao ainda nao cadastrado.";
+  }
+
+  if (normalized.includes("aviso") || normalized.includes("recado") || normalized.includes("comunicado")) {
+    const notices = schoolData.avisos || [];
+    return notices.length ? `Avisos:\n${notices.join("\n")}` : "Nao ha avisos cadastrados no momento.";
   }
 
   if (normalized.includes("ajuda") || normalized.includes("ola") || normalized.includes("oi")) {
-    return "Ola! Posso ajudar com horario de aulas, cardapio da merenda, eventos da escola e contato da secretaria.";
+    return schoolData.escola?.saudacao || "Ola! Posso ajudar com horario de aulas, cardapio da merenda e eventos.";
   }
 
   return "Ainda nao encontrei essa informacao. Tente perguntar sobre merenda, horario de uma turma, eventos ou secretaria.";
@@ -216,6 +188,16 @@ function fillDashboard() {
   nextEventEl.textContent = event ? `${formatDate(event.date)} - ${event.title}` : "Sem eventos cadastrados";
 }
 
+function fillBranding() {
+  const school = schoolData.escola || {};
+  const name = school.nome || "Chatbot Escolar";
+
+  document.title = name;
+  schoolNameEl.textContent = name;
+  schoolSubtitleEl.textContent = school.subtitulo || "Assistente escolar";
+  schoolInitialsEl.textContent = school.sigla || "CE";
+}
+
 formEl.addEventListener("submit", (event) => {
   event.preventDefault();
   const question = inputEl.value.trim();
@@ -234,9 +216,6 @@ document.querySelectorAll("[data-question]").forEach((button) => {
   });
 });
 
+fillBranding();
 fillDashboard();
-addMessage(
-  "Assistente",
-  "Ola! Eu sou o assistente da escola. Pergunte sobre horarios, merenda, eventos ou contatos.",
-  "bot"
-);
+addMessage("Assistente", schoolData.escola?.saudacao || "Ola! Como posso ajudar?", "bot");

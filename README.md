@@ -44,4 +44,39 @@ Crie um workflow com:
 }
 ```
 
-Se o n8n estiver desligado ou sem URL configurada, o chatbot continua respondendo com os dados locais do arquivo `app.js`.
+Se o n8n estiver desligado ou sem URL configurada, o chatbot continua respondendo com os dados locais do arquivo `dados-escola.js`.
+
+## Personalizar dados e respostas
+
+Edite o arquivo `dados-escola.js`.
+
+Para trocar nome e saudacao:
+
+```js
+escola: {
+  nome: "Nome da Escola",
+  sigla: "NE",
+  subtitulo: "Assistente escolar",
+  saudacao: "Ola! Como posso ajudar?"
+}
+```
+
+Para trocar merenda:
+
+```js
+merenda: {
+  segunda: "Arroz, feijao e frango.",
+  terca: "Macarrao e salada."
+}
+```
+
+Para adicionar resposta personalizada:
+
+```js
+{
+  palavras: ["uniforme", "roupa"],
+  resposta: "O uniforme deve ser usado todos os dias."
+}
+```
+
+Para publicar as alteracoes, envie o arquivo alterado para o GitHub. O Render fara um novo deploy automaticamente se o auto deploy estiver ativo.

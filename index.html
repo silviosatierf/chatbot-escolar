@@ -17,10 +17,10 @@
     <main class="app-shell">
       <section class="sidebar" aria-label="Informacoes escolares">
         <div class="school-mark">
-          <span class="school-mark__icon">CE</span>
+          <span id="schoolInitials" class="school-mark__icon">CE</span>
           <div>
-            <p class="eyebrow">Assistente escolar</p>
-            <h1>Chatbot Escolar</h1>
+            <p id="schoolSubtitle" class="eyebrow">Assistente escolar</p>
+            <h1 id="schoolName">Chatbot Escolar</h1>
           </div>
         </div>
 
@@ -70,6 +70,7 @@
     </main>
 
     <script src="config.js"></script>
+    <script src="dados-escola.js"></script>
     <script src="app.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
